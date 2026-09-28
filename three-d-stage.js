@@ -99,6 +99,7 @@
     .toolbar button:hover { background: #fff; }
     .toolbar button:active { transform: translateY(1px); }
     .toolbar button[disabled] { opacity: 0.5; pointer-events: none; }
+    .toolbar, .note { display: none !important; }
     .note {
       position: absolute;
       left: 16px;
@@ -158,8 +159,7 @@
       root.appendChild(this._err);
       const note = document.createElement('div');
       note.className = 'note';
-      note.textContent = 'Drag to orbit · scroll to zoom · right-drag to pan';
-      root.appendChild(note);
+      note.textContent = '';
       this._toolbar = document.createElement('div');
       this._toolbar.className = 'toolbar';
       this._objBtn = document.createElement('button');
@@ -170,9 +170,7 @@
       this._glbBtn.type = 'button';
       this._glbBtn.textContent = 'Download GLB';
       this._glbBtn.addEventListener('click', () => this._runExport('glb'));
-      this._toolbar.appendChild(this._objBtn);
-      this._toolbar.appendChild(this._glbBtn);
-      root.appendChild(this._toolbar);
+      // presentation build: export toolbar not mounted
       this._setButtonsEnabled(false);
       /** Resolves with { THREE } once the scene is live — build the model
        *  in `await stage.ready` so nothing races the library load. */
@@ -260,7 +258,7 @@
       this._ground = ground;
       scene.add(ground);
 
-      this._autorotate = this.hasAttribute('autorotate');
+      this._autorotate = this.hasAttribute('autorotate') && !/[?&]still=1/.test(location.search);
       controls.autoRotate = this._autorotate;
       controls.autoRotateSpeed = 1.2;
       controls.addEventListener('start', () => {

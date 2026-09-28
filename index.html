@@ -2,177 +2,184 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1c1a17">
 <title>Delegate Memento — Presentation Cabinet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  body{margin:0;background:#1c1a17;color:#efe8da;font-family:'Cormorant Garamond',Georgia,serif;line-height:1.5}
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:#1c1a17;color:#efe8da;font-family:'Cormorant Garamond',Georgia,serif;line-height:1.5;overflow-x:hidden}
   a{color:#c9b48a} a:hover{color:#e0cfa5}
-  h1,h2,h3,h4,h5,h6{font-family:'Cormorant Garamond',Georgia,serif;margin:0}
+  h1,h2,h3,h4,h5,h6,p,figure{margin:0}
   img{display:block;max-width:100%}
-  .wrap{max-width:1120px;margin:0 auto;padding:56px 32px 96px;display:flex;flex-direction:column;gap:72px}
-  .hero{aspect-ratio:16/9;min-height:380px}
-  .two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr);gap:40px}
-  .door{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:40px;align-items:center}
-  .h1{font-size:56px}
-  .lead{font-size:19px}
+  iframe{display:block;border:0;background:#1c1a17}
+
+  .wrap{max-width:1120px;margin:0 auto;padding:clamp(28px,6vw,56px) clamp(18px,4vw,32px) clamp(56px,10vw,96px);display:flex;flex-direction:column;gap:clamp(44px,7vw,72px)}
+  .kicker{color:#c9b48a;font-size:clamp(12px,1.1vw,13px);letter-spacing:.14em;text-transform:uppercase;font-weight:600}
+  header{display:flex;flex-direction:column;gap:14px;max-width:760px}
+  h1{font-size:clamp(32px,6.5vw,56px);line-height:1.06;letter-spacing:-.01em;font-weight:500;text-wrap:balance}
+  .lead{font-size:clamp(17px,1.7vw,19px);line-height:1.55;color:#b3aa98;text-wrap:pretty}
+  h2{font-size:clamp(26px,3.2vw,32px);font-weight:500;letter-spacing:-.01em}
+  .muted{font-size:15px;line-height:1.5;color:#8f877a}
+  .body{font-size:clamp(15px,1.5vw,16px);line-height:1.55;color:#b3aa98}
+
+  .stage{display:flex;flex-direction:column;gap:12px}
+  .hero{position:relative;aspect-ratio:16/9;border-radius:14px;overflow:hidden;border:1px solid #302c26}
+  .hero iframe{position:absolute;inset:0;width:100%;height:100%}
+  .gate{position:absolute;inset:0;display:none;align-items:flex-end;justify-content:center;padding:16px;background:transparent;border:0;cursor:pointer;font:inherit}
+  .gate span{background:rgba(28,26,23,.82);color:#efe8da;border:1px solid #c9b48a;border-radius:999px;padding:10px 18px;font-size:15px;letter-spacing:.02em}
+  .under{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:14px;color:#8f877a}
+  .under a{text-decoration:none}
   .hint{display:none}
-  @media (max-width:640px){
-    .wrap{padding:32px 20px 64px;gap:48px}
-    .hero{aspect-ratio:4/5;min-height:0}
-    .two,.door{grid-template-columns:minmax(0,1fr);gap:20px}
-    .h1{font-size:38px}
-    .lead{font-size:17px}
+
+  .three{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(20px,4vw,40px);align-items:start}
+  .tile{display:flex;flex-direction:column;gap:10px}
+  .square{aspect-ratio:1/1;border-radius:8px;overflow:hidden;border:1px solid #302c26}
+  .square iframe,.square img{width:100%;height:100%;object-fit:cover;pointer-events:none}
+
+  .two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr);gap:clamp(20px,4vw,40px)}
+  .points{display:flex;flex-direction:column;gap:22px}
+  .pt{display:grid;grid-template-columns:28px minmax(0,1fr);gap:16px}
+  .pt span{font-size:12px;color:#c9b48a;padding-top:3px}
+  .pt p{font-size:clamp(16px,1.7vw,18px);line-height:1.55;color:#cfc6b4}
+  .pt strong{font-weight:500;color:#efe8da}
+
+  .sect{display:flex;flex-direction:column;gap:24px}
+  .cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+  .card{display:flex;flex-direction:column;gap:6px;padding:18px;border-radius:8px;background:#26221e;border:1px solid #302c26}
+  .card strong{font-weight:600;font-size:18px}
+  .card p{font-size:15px;line-height:1.5;color:#b3aa98}
+
+  .swatches{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:20px}
+  .sw{display:flex;flex-direction:column;gap:10px}
+  .sw div{aspect-ratio:4/3;border-radius:8px;border:1px solid #302c26}
+  .sw strong{font-weight:600;font-size:17px}
+  .sw span{font-size:14px;color:#8f877a}
+
+  .door{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:clamp(20px,4vw,40px);align-items:center}
+  .doorface{aspect-ratio:44/48;background:linear-gradient(135deg,#5e1a1e,#360e11 55%,#4a1417);border-radius:8px;display:grid;grid-template-columns:1fr 2px 1fr;border:1px solid #302c26;overflow:hidden}
+  .doorface>div{padding:7%;display:flex}
+  .doorface .seam{background:#b08a4e;padding:0}
+  .r1{flex:1;border:2px solid #b08a4e;padding:5%;display:flex}
+  .r2{flex:1;border:1px solid #b08a4e}
+  .doortext{display:flex;flex-direction:column;gap:14px}
+  .note{font-size:13px;color:#c9b48a}
+
+  @media (max-width:960px){
+    .three{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .cards{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .swatches{grid-template-columns:repeat(3,minmax(0,1fr))}
+  }
+  @media (max-width:700px){
+    .hero{aspect-ratio:4/5;border-radius:10px}
+    .hero iframe{pointer-events:none}
+    .hero.live iframe{pointer-events:auto}
+    .gate{display:flex} .hero.live .gate{display:none}
     .hint{display:inline} .desk{display:none}
+    .three,.two,.cards,.door{grid-template-columns:minmax(0,1fr)}
+    .swatches{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+    .pt{grid-template-columns:24px minmax(0,1fr);gap:12px}
+    .card{padding:16px}
   }
 </style>
 </head>
 <body>
 <div class="wrap">
 
-  <header style="display:flex;flex-direction:column;gap:14px;max-width:760px">
-    <h6 style="margin:0;color:#c9b48a;font-size:13px;letter-spacing:.14em;text-transform:uppercase;font-weight:600">Packaging concept · Delegate memento&nbsp;<br></h6>
-    <h1 class="h1" style="margin:0;line-height:1.02;letter-spacing:-.01em;font-weight:500">Packaging that is never put away. The case is the shrine.</h1>
-    <p class="lead" style="margin:0;line-height:1.55;color:#b3aa98;text-wrap:pretty">A lacquered cabinet with twin doors. Closed, it travels and hands over as a sealed oxblood-and-bronze object. Opened, the doors swing back, and the memento stands on its bronze rail with its own concealed light already on, exactly as it was photographed. It goes from the ceremony straight onto a desk or console, already displayed.</p>
+  <header>
+    <h6 class="kicker">Packaging concept · Delegate memento</h6>
+    <h1>Packaging that is never put away. The case is the shrine.</h1>
+    <p class="lead">A lacquered cabinet with twin doors. Closed, it travels and hands over as a sealed oxblood-and-bronze object. Opened, the doors swing back, and the memento stands on its bronze rail with its own concealed light already on, exactly as it was photographed. It goes from the ceremony straight onto a desk or console, already displayed.</p>
   </header>
 
-  <section style="display:flex;flex-direction:column;gap:12px">
-    <div class="hero" style="position:relative;border-radius:14px;overflow:hidden;border:1px solid #302c26">
-      <iframe src="cabinet-3d.html" title="Memento display cabinet, 3D" style="position:absolute;inset:0;width:100%;height:100%;border:0"></iframe>
+  <section class="stage">
+    <div class="hero" id="hero">
+      <iframe src="cabinet-3d.html" title="Memento display cabinet, 3D"></iframe>
+      <button class="gate" type="button" id="gate" aria-label="Activate 3D view"><span>Tap to rotate the cabinet</span></button>
     </div>
-    <div style="display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:14px;color:#8f877a">
-      <span><span class="desk">Drag to orbit · scroll to zoom · OBJ and GLB download in the corner</span><span class="hint">One finger to orbit · pinch to zoom</span></span>
-      <a href="cabinet-3d.html" style="text-decoration:none">Open full screen →</a>
+    <div class="under">
+      <span><span class="desk">Drag to orbit · scroll to zoom</span><span class="hint">One finger to orbit · pinch to zoom</span></span>
+      <a href="cabinet-3d.html">Open full screen →</a>
     </div>
   </section>
 
-  <section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:40px;align-items:start">
-    <div style="display:flex;flex-direction:column;gap:10px">
-      <h6 style="margin:0;color:#c9b48a;font-size:13px;letter-spacing:.14em;text-transform:uppercase;font-weight:600">Handed over</h6>
-      <div style="aspect-ratio:1/1;border-radius:8px;overflow:hidden;border:1px solid #302c26">
-        <iframe src="cabinet-3d.html?open=0" title="Cabinet closed" style="width:100%;height:100%;border:0;pointer-events:none"></iframe>
-      </div>
-      <p style="margin:0;font-size:15px;line-height:1.5;color:#8f877a">Sealed. Oxblood lacquer, one bronze seam where the doors meet, a plaque on the plinth. Nothing else.</p>
+  <section class="three">
+    <div class="tile">
+      <h6 class="kicker">Handed over</h6>
+      <div class="square"><iframe src="cabinet-3d.html?open=0&amp;still=1" title="Cabinet closed" loading="lazy" tabindex="-1"></iframe></div>
+      <p class="muted">Sealed. Oxblood lacquer, one bronze seam where the doors meet, a plaque on the plinth. Nothing else.</p>
     </div>
-    <div style="display:flex;flex-direction:column;gap:10px">
-      <h6 style="margin:0;color:#c9b48a;font-size:13px;letter-spacing:.14em;text-transform:uppercase;font-weight:600">Opened</h6>
-      <div style="aspect-ratio:1/1;border-radius:8px;overflow:hidden;border:1px solid #302c26">
-        <iframe src="cabinet-3d.html" title="Cabinet open" style="width:100%;height:100%;border:0;pointer-events:none"></iframe>
-      </div>
-      <p style="margin:0;font-size:15px;line-height:1.5;color:#8f877a">Doors to 112°. The frame's own light is waiting behind them. The certificate drawer sits below the relief.</p>
+    <div class="tile">
+      <h6 class="kicker">Opened</h6>
+      <div class="square"><iframe src="cabinet-3d.html?still=1" title="Cabinet open" loading="lazy" tabindex="-1"></iframe></div>
+      <p class="muted">Doors to 112°. The frame's own light is waiting behind them. The certificate drawer sits below the relief.</p>
     </div>
-    <div style="display:flex;flex-direction:column;gap:10px">
-      <h6 style="margin:0;color:#c9b48a;font-size:13px;letter-spacing:.14em;text-transform:uppercase;font-weight:600">The memento it holds</h6>
-      <figure style="margin:0;aspect-ratio:1/1;border-radius:8px;overflow:hidden"><img src="memento.jpg" alt="Slate relief in ebonised frame with brass fillets" style="width:100%;height:100%;object-fit:cover;display:block"></figure>
-      <p style="margin:0;font-size:15px;line-height:1.5;color:#8f877a">13 × 11 × 3 in · Italian slate relief, ebonised frame, twin brass fillets. The cabinet answers the black frame with oxblood, and the brass with aged bronze.</p>
+    <div class="tile">
+      <h6 class="kicker">The memento it holds</h6>
+      <figure class="square"><img src="memento.jpg" alt="Slate relief in ebonised frame with brass fillets" loading="lazy"></figure>
+      <p class="muted">13 × 11 × 3 in · Italian slate relief, ebonised frame, twin brass fillets. The cabinet answers the black frame with oxblood, and the brass with aged bronze.</p>
     </div>
   </section>
 
   <section class="two">
-    <h2 style="margin:0;font-size:32px;font-weight:500;letter-spacing:-.01em">What makes it new</h2>
-    <div style="display:flex;flex-direction:column;gap:22px">
-      <div style="display:grid;grid-template-columns:28px minmax(0,1fr);gap:16px">
-        <span style="font-size:12px;color:#c9b48a;padding-top:3px">01</span>
-        <p style="margin:0;font-size:18px;line-height:1.55;color:#cfc6b4"><strong style="font-weight:500;color:#efe8da">Vertical, not flat.</strong> Every gift box lies down and gets stored. This one stands, so the recipient never has to decide where the frame goes. It is already placed.</p>
-      </div>
-      <div style="display:grid;grid-template-columns:28px minmax(0,1fr);gap:16px">
-        <span style="font-size:12px;color:#c9b48a;padding-top:3px">02</span>
-        <p style="margin:0;font-size:18px;line-height:1.55;color:#cfc6b4"><strong style="font-weight:500;color:#efe8da">No light of its own.</strong> The memento is already lit by a single focus bulb inside its frame, so the cabinet adds nothing that competes. It stays dark and quiet around the relief; a reed switch in the door seam wakes the frame's light as the doors part.</p>
-      </div>
-      <div style="display:grid;grid-template-columns:28px minmax(0,1fr);gap:16px">
-        <span style="font-size:12px;color:#c9b48a;padding-top:3px">03</span>
-        <p style="margin:0;font-size:18px;line-height:1.55;color:#cfc6b4"><strong style="font-weight:500;color:#efe8da">Doors, so there is a ritual.</strong> Two hands, two bronze pulls, a slow reveal from the centre outward. Opening becomes part of the presentation on stage.</p>
-      </div>
-      <div style="display:grid;grid-template-columns:28px minmax(0,1fr);gap:16px">
-        <span style="font-size:12px;color:#c9b48a;padding-top:3px">04</span>
-        <p style="margin:0;font-size:18px;line-height:1.55;color:#cfc6b4"><strong style="font-weight:500;color:#efe8da">A drawer for the words.</strong> The plinth holds a silk-lined drawer for the certificate and a signed letter on cotton paper, kept with the object instead of in a folder.</p>
-      </div>
+    <h2>What makes it new</h2>
+    <div class="points">
+      <div class="pt"><span>01</span><p><strong>Vertical, not flat.</strong> Every gift box lies down and gets stored. This one stands, so the recipient never has to decide where the frame goes. It is already placed.</p></div>
+      <div class="pt"><span>02</span><p><strong>No light of its own.</strong> The memento is already lit by a single focus bulb inside its frame, so the cabinet adds nothing that competes. It stays dark and quiet around the relief; a reed switch in the door seam wakes the frame's light as the doors part.</p></div>
+      <div class="pt"><span>03</span><p><strong>Doors, so there is a ritual.</strong> Two hands, two bronze pulls, a slow reveal from the centre outward. Opening becomes part of the presentation on stage.</p></div>
+      <div class="pt"><span>04</span><p><strong>A drawer for the words.</strong> The plinth holds a silk-lined drawer for the certificate and a signed letter on cotton paper, kept with the object instead of in a folder.</p></div>
     </div>
   </section>
 
-  <section style="display:flex;flex-direction:column;gap:24px">
-    <h2 style="margin:0;font-size:32px;font-weight:500;letter-spacing:-.01em">Construction</h2>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:20px">
-      <div style="display:flex;flex-direction:column;gap:6px;padding:18px;border-radius:8px;background:#26221e;border:1px solid #302c26">
-        <strong style="font-weight:600;font-size:18px">Carcass</strong>
-        <p style="margin:0;font-size:15px;line-height:1.5;color:#b3aa98">14 mm hardwood-faced MDF, mitred corners, eight-coat oxblood lacquer. Outside 43.8 × 42.3 × 18.2 cm. Approx. 6.5 kg with the frame.</p>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:6px;padding:18px;border-radius:8px;background:#26221e;border:1px solid #302c26">
-        <strong style="font-weight:600;font-size:18px">Doors</strong>
-        <p style="margin:0;font-size:15px;line-height:1.5;color:#b3aa98">16 mm, three bronze barrel hinges each, soft-close to 112°. Padded oxblood leather inside. Bronze-foil double rule on the face; 2 mm bronze strip on the meeting edge. Concealed magnetic catch.</p>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:6px;padding:18px;border-radius:8px;background:#26221e;border:1px solid #302c26">
-        <strong style="font-weight:600;font-size:18px">Chamber</strong>
-        <p style="margin:0;font-size:15px;line-height:1.5;color:#b3aa98">Champagne silk on all faces. Frame leans back 6° against the silk back and rests on an 8 mm bronze rail, 30 mm up. Two bronze contact pads on the floor feed its bulb. Two hidden neodymium pads hold it in transit.</p>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:6px;padding:18px;border-radius:8px;background:#26221e;border:1px solid #302c26">
-        <strong style="font-weight:600;font-size:18px">Power</strong>
-        <p style="margin:0;font-size:15px;line-height:1.5;color:#b3aa98">The frame's own light draws from a USB-C cell in the plinth through two bronze contact pads on the rail. No visible cable; the frame lifts off freely.</p>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:6px;padding:18px;border-radius:8px;background:#26221e;border:1px solid #302c26">
-        <strong style="font-weight:600;font-size:18px">Plinth and drawer</strong>
-        <p style="margin:0;font-size:15px;line-height:1.5;color:#b3aa98">70 mm plinth with a bronze perimeter line. Push-to-open drawer, silk lined, sized for the A5 cotton certificate and a folded letter. Engraved bronze plaque centred on the drawer front.</p>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:6px;padding:18px;border-radius:8px;background:#26221e;border:1px solid #302c26">
-        <strong style="font-weight:600;font-size:18px">Transit</strong>
-        <p style="margin:0;font-size:15px;line-height:1.5;color:#b3aa98">Cabinet ships in a oxblood cotton dust bag inside a fitted foam shipper; the bag stays with the piece as a cover.</p>
-      </div>
+  <section class="sect">
+    <h2>Construction</h2>
+    <div class="cards">
+      <div class="card"><strong>Carcass</strong><p>14 mm hardwood-faced MDF, mitred corners, eight-coat oxblood lacquer. Outside 43.8 × 42.3 × 18.2 cm. Approx. 6.5 kg with the frame.</p></div>
+      <div class="card"><strong>Doors</strong><p>16 mm, three bronze barrel hinges each, soft-close to 112°. Padded oxblood leather inside. Bronze-foil double rule on the face; 2 mm bronze strip on the meeting edge. Concealed magnetic catch.</p></div>
+      <div class="card"><strong>Chamber</strong><p>Champagne silk on all faces. Frame leans back 6° against the silk back and rests on an 8 mm bronze rail, 30 mm up. Two bronze contact pads on the floor feed its bulb. Two hidden neodymium pads hold it in transit.</p></div>
+      <div class="card"><strong>Power</strong><p>The frame's own light draws from a USB-C cell in the plinth through two bronze contact pads on the rail. No visible cable; the frame lifts off freely.</p></div>
+      <div class="card"><strong>Plinth and drawer</strong><p>70 mm plinth with a bronze perimeter line. Push-to-open drawer, silk lined, sized for the A5 cotton certificate and a folded letter. Engraved bronze plaque centred on the drawer front.</p></div>
+      <div class="card"><strong>Transit</strong><p>Cabinet ships in an oxblood cotton dust bag inside a fitted foam shipper; the bag stays with the piece as a cover.</p></div>
     </div>
   </section>
 
-  <section style="display:flex;flex-direction:column;gap:24px">
-    <h2 style="margin:0;font-size:32px;font-weight:500;letter-spacing:-.01em">Materials</h2>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:20px">
-      <div style="display:flex;flex-direction:column;gap:10px">
-        <div style="aspect-ratio:4/3;border-radius:8px;background:linear-gradient(135deg,#6a1e22,#3a0f12 60%,#521619);border:1px solid #302c26"></div>
-        <strong style="font-weight:600;font-size:17px">Oxblood lacquer</strong>
-        <span style="font-size:14px;color:#8f877a">Carcass, doors, plinth</span>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:10px">
-        <div style="aspect-ratio:4/3;border-radius:8px;background:linear-gradient(135deg,#d2b07a,#a67d42 45%,#6f5228 70%,#c4a06a);border:1px solid #302c26"></div>
-        <strong style="font-weight:600;font-size:17px">Aged bronze</strong>
-        <span style="font-size:14px;color:#8f877a">Hinges, pulls, rail, housing, plaque</span>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:10px">
-        <div style="aspect-ratio:4/3;border-radius:8px;background:radial-gradient(ellipse at 30% 30%,#e2d1a6,#bfa878 70%);border:1px solid #302c26"></div>
-        <strong style="font-weight:600;font-size:17px">Champagne silk</strong>
-        <span style="font-size:14px;color:#8f877a">Chamber, drawer</span>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:10px">
-        <div style="aspect-ratio:4/3;border-radius:8px;background:linear-gradient(160deg,#4a1618,#2c0c0e);border:1px solid #302c26"></div>
-        <strong style="font-weight:600;font-size:17px">Oxblood leather</strong>
-        <span style="font-size:14px;color:#8f877a">Padded door interiors</span>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:10px">
-        <div style="aspect-ratio:4/3;border-radius:8px;background:linear-gradient(135deg,#d7bd78,#b6963f);border:1px solid #302c26"></div>
-        <strong style="font-weight:600;font-size:17px">Bronze foil</strong>
-        <span style="font-size:14px;color:#8f877a">Double rule on each door</span>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:10px">
-        <div style="aspect-ratio:4/3;border-radius:8px;background:linear-gradient(135deg,#efe9dc,#d9d2c2);border:1px solid #302c26"></div>
-        <strong style="font-weight:600;font-size:17px">Cotton paper</strong>
-        <span style="font-size:14px;color:#8f877a">Certificate and letter</span>
-      </div>
+  <section class="sect">
+    <h2>Materials</h2>
+    <div class="swatches">
+      <div class="sw"><div style="background:linear-gradient(135deg,#6a1e22,#3a0f12 60%,#521619)"></div><strong>Oxblood lacquer</strong><span>Carcass, doors, plinth</span></div>
+      <div class="sw"><div style="background:linear-gradient(135deg,#d2b07a,#a67d42 45%,#6f5228 70%,#c4a06a)"></div><strong>Aged bronze</strong><span>Hinges, pulls, rail, plaque</span></div>
+      <div class="sw"><div style="background:radial-gradient(ellipse at 30% 30%,#e2d1a6,#bfa878 70%)"></div><strong>Champagne silk</strong><span>Chamber, drawer</span></div>
+      <div class="sw"><div style="background:linear-gradient(160deg,#4a1618,#2c0c0e)"></div><strong>Oxblood leather</strong><span>Padded door interiors</span></div>
+      <div class="sw"><div style="background:linear-gradient(135deg,#d7bd78,#b6963f)"></div><strong>Bronze foil</strong><span>Double rule on each door</span></div>
+      <div class="sw"><div style="background:linear-gradient(135deg,#efe9dc,#d9d2c2)"></div><strong>Cotton paper</strong><span>Certificate and letter</span></div>
     </div>
   </section>
 
-  <section style="display:flex;flex-direction:column;gap:24px">
-    <h2 style="margin:0;font-size:32px;font-weight:500;letter-spacing:-.01em">Door face</h2>
+  <section class="sect">
+    <h2>Door face</h2>
     <div class="door">
-      <div style="aspect-ratio:44/48;background:linear-gradient(135deg,#5e1a1e,#360e11 55%,#4a1417);border-radius:8px;display:grid;grid-template-columns:1fr 2px 1fr;border:1px solid #302c26;overflow:hidden">
-        <div style="padding:7%;display:flex"><div style="flex:1;border:2px solid #b08a4e;padding:5%;display:flex"><div style="flex:1;border:1px solid #b08a4e"></div></div></div>
-        <div style="background:#b08a4e"></div>
-        <div style="padding:7%;display:flex"><div style="flex:1;border:2px solid #b08a4e;padding:5%;display:flex"><div style="flex:1;border:1px solid #b08a4e"></div></div></div>
+      <div class="doorface">
+        <div><div class="r1"><div class="r2"></div></div></div>
+        <div class="seam"></div>
+        <div><div class="r1"><div class="r2"></div></div></div>
       </div>
-      <div style="display:flex;flex-direction:column;gap:14px">
-        <p style="margin:0;font-size:16px;line-height:1.55;color:#b3aa98">Each door carries the frame's twin-fillet motif in bronze foil: a 2.5 mm outer and 1.5 mm inner rule. The bronze meeting seam reads as a single vertical line when closed and disappears when open.</p>
-        <p style="margin:0;font-size:16px;line-height:1.55;color:#b3aa98">Emblem and wording go on the plinth plaque only, 110 × 32 mm, engraved and blackened.</p>
-        <p style="margin:0;font-size:13px;color:#c9b48a">Emblem and wording still to be supplied.</p>
+      <div class="doortext">
+        <p class="body">Each door carries the frame's twin-fillet motif in bronze foil: a 2.5 mm outer and 1.5 mm inner rule. The bronze meeting seam reads as a single vertical line when closed and disappears when open.</p>
+        <p class="body">Emblem and wording go on the plinth plaque only, 110 × 32 mm, engraved and blackened.</p>
+        <p class="note">Emblem and wording still to be supplied.</p>
       </div>
     </div>
   </section>
 
 </div>
-
+<script>
+  // On touch screens the 3D view would otherwise capture every swipe and trap page scroll.
+  document.getElementById('gate').addEventListener('click', function () {
+    document.getElementById('hero').classList.add('live');
+  });
+</script>
 </body>
 </html>

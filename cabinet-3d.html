@@ -32,6 +32,7 @@
 <script src="three-d-stage.js"></script>
 <script type="module">
 const stage = document.querySelector('three-d-stage');
+if (new URLSearchParams(location.search).get('still') === '1') stage.removeAttribute('autorotate');
 const { THREE } = await stage.ready;
 const q = new URLSearchParams(location.search);
 const OPEN = q.get('open') !== '0';
