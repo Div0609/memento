@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Memento display cabinet — 3D</title>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.184.0/build/three.module.js",
+    "three/addons/controls/OrbitControls.js": "https://unpkg.com/three@0.184.0/examples/jsm/controls/OrbitControls.js",
+    "three/addons/exporters/OBJExporter.js": "https://unpkg.com/three@0.184.0/examples/jsm/exporters/OBJExporter.js",
+    "three/addons/exporters/GLTFExporter.js": "https://unpkg.com/three@0.184.0/examples/jsm/exporters/GLTFExporter.js"
+  },
+  "integrity": {
+    "https://unpkg.com/three@0.184.0/build/three.module.js": "sha384-8FCZ1eVO6it4+pbec2aDtnTrwjWXZLJRC+MAGCIPDgsYnUrl/E0A2YlF8ioMKI/J",
+    "https://unpkg.com/three@0.184.0/build/three.core.js": "sha384-dw2ooPewaEIrAgl6oFDBmmBWCE9oW9LxRGcfwZ0hLvEprzo202wXl7vCYHRlSnOT",
+    "https://unpkg.com/three@0.184.0/examples/jsm/controls/OrbitControls.js": "sha384-4rziNxOBZKQ69i+w+f89KJ55TCYquwchVbByQwmaOeIOXdOU2PLDn3kOfXHwIJC9",
+    "https://unpkg.com/three@0.184.0/examples/jsm/exporters/OBJExporter.js": "sha384-nbwtoZENJD3Vq+ACK0CuGQdPMuDWHkamC2KJD70EV5nfg6jQjfppKOea07YJN+N3",
+    "https://unpkg.com/three@0.184.0/examples/jsm/exporters/GLTFExporter.js": "sha384-VofkvpG6HERhFCYbsUOHeNXBCqID2nfqkQqnVzE1jc/oPcz+qJ13ADdXH08hE+cQ"
+  }
+}
+</script>
+<style>
+  html,body{margin:0;height:100%;background:#1c1a17}
+  three-d-stage:not(:defined){visibility:hidden}
+  three-d-stage{display:block;width:100vw;height:100vh}
+</style>
+</head>
+<body>
+<three-d-stage name="memento-display-cabinet" background="#1c1a17" autorotate></three-d-stage>
+<script src="three-d-stage.js"></script>
+<script type="module">
+const stage = document.querySelector('three-d-stage');
+const { THREE } = await stage.ready;
+const q = new URLSearchParams(location.search);
+const OPEN = q.get('open') !== '0';
+
+const M = {
+  lacquer: new THREE.MeshStandardMaterial({ name: 'oxblood_lacquer', color: 0x4a1417, roughness: 0.14, metalness: 0.12 }),
+  brass:   new THREE.MeshStandardMaterial({ name: 'aged_bronze', color: 0xb08a4e, roughness: 0.38, metalness: 0.38 }),
+  velvet:  new THREE.MeshStandardMaterial({ name: 'champagne_silk', color: 0xc9b48a, roughness: 0.85 }),
+  leather: new THREE.MeshStandardMaterial({ name: 'oxblood_leather', color: 0x3a1214, roughness: 0.7 }),
+  wood:    new THREE.MeshStandardMaterial({ name: 'ebonised_wood_frame', color: 0x1c1512, roughness: 0.45 }),
+  slate:   new THREE.MeshStandardMaterial({ name: 'italian_slate', color: 0x8a847d, roughness: 0.98 }),
+  slateDk: new THREE.MeshStandardMaterial({ name: 'slate_relief', color: 0x6b655f, roughness: 1 }),
+  glow:    new THREE.MeshStandardMaterial({ name: 'warm_led', color: 0xffe2a8, emissive: 0xffc774, emissiveIntensity: 1.1, roughness: 0.6 }),
+  paper:   new THREE.MeshStandardMaterial({ name: 'cotton_paper', color: 0xefe8da, roughness: 0.9 }),
+};
+const box = (name, mat, w, h, d, x, y, z) => {
+  const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);
+  m.name = name; m.position.set(x, y, z); m.castShadow = m.receiveShadow = true; return m;
+};
+// rectangular ring in the xz plane
+const ring = (name, mat, w, d, t, h, x, y, z) => {
+  const g = new THREE.Group(); g.name = name;
+  g.add(box(name + '_n', mat, w, h, t, 0, 0, -d / 2 + t / 2));
+  g.add(box(name + '_s', mat, w, h, t, 0, 0, d / 2 - t / 2));
+  g.add(box(name + '_w', mat, t, h, d - 2 * t, -w / 2 + t / 2, 0, 0));
+  g.add(box(name + '_e', mat, t, h, d - 2 * t, w / 2 - t / 2, 0, 0));
+  g.position.set(x, y, z); return g;
+};
+const cyl = (name, mat, r, len, x, y, z, axis) => {
+  const m = new THREE.Mesh(new THREE.CylinderGeometry(r, r, len, 32), mat);
+  m.name = name; m.position.set(x, y, z);
+  if (axis === 'x') m.rotation.z = Math.PI / 2; if (axis === 'z') m.rotation.x = Math.PI / 2;
+  m.castShadow = true; return m;
+};
+
+// ---- dimensions (m). memento 13 x 11 x 3 in, standing upright, 13 wide ----
+const MW = 0.3302, MHt = 0.2794, MD = 0.0762;
+const T = 0.014, GAP = 0.03, DOOR_T = 0.016, PLINTH = 0.07, LEAN = THREE.MathUtils.degToRad(6);
+const W = MW + 2 * GAP + 2 * T;                  // 0.4182 carcass width
+const CH = MHt + 2 * GAP + T;                    // 0.3534 carcass height (chamber + top)
+const D = 0.146;                                  // carcass depth, back face to door plane
+const VEL = 0.004, CLR = 0.0005;                  // silk thickness, anti-coplanar clearance
+const IW = W - 2 * T, ID = D - T;
+const sin = Math.sin(LEAN), cos = Math.cos(LEAN);
+
+const model = new THREE.Group(); model.name = 'memento_display_cabinet';
+
+// ---- plinth with push-to-open certificate drawer ----
+const PW = W + 0.02, PD = D + DOOR_T + 0.02, FT = 0.012;
+const pz = DOOR_T / 2, zf = pz + PD / 2;         // plinth centre z, plinth front face z
+const aw = W - 0.03, ah = PLINTH - 0.024;         // drawer aperture (1 mm reveal all round)
+const plinth = new THREE.Group(); plinth.name = 'plinth';
+plinth.add(box('plinth_shell', M.lacquer, PW, PLINTH, PD - FT, 0, PLINTH / 2, pz - FT / 2));
+const stripH = PLINTH / 2 - ah / 2 - 0.001, sideW = (PW - aw - 0.002) / 2;
+plinth.add(box('plinth_front_top', M.lacquer, PW, stripH, FT, 0, PLINTH - stripH / 2, zf - FT / 2));
+plinth.add(box('plinth_front_bottom', M.lacquer, PW, stripH, FT, 0, stripH / 2, zf - FT / 2));
+plinth.add(box('plinth_front_left', M.lacquer, sideW, ah + 0.002, FT, -PW / 2 + sideW / 2, PLINTH / 2, zf - FT / 2));
+plinth.add(box('plinth_front_right', M.lacquer, sideW, ah + 0.002, FT, PW / 2 - sideW / 2, PLINTH / 2, zf - FT / 2));
+plinth.add(ring('plinth_bronze_line', M.brass, PW + 0.001, PD + 0.001, 0.0015, 0.002, 0, PLINTH - 0.006, pz));
+const out = OPEN ? 0.06 : 0, DL = 0.155;
+plinth.add(box('drawer_front', M.lacquer, aw, ah, FT, 0, PLINTH / 2, zf - FT / 2 + out));
+const dw = aw - 0.004, dh = ah - 0.006, dzc = zf - FT - DL / 2 + out, dy0 = PLINTH / 2 - dh / 2;
+plinth.add(box('drawer_floor', M.velvet, dw, 0.003, DL, 0, dy0 + 0.0015, dzc));
+plinth.add(ring('drawer_walls', M.velvet, dw, DL, 0.003, dh - 0.003, 0, dy0 + 0.003 + (dh - 0.003) / 2, dzc));
+if (OPEN) plinth.add(box('certificate_a5', M.paper, 0.210, 0.0015, 0.148, 0, dy0 + 0.003 + 0.00075, dzc));
+const face = zf + out;
+plinth.add(box('plinth_plaque', M.brass, 0.11, 0.032, 0.0012, 0, PLINTH / 2, face + 0.0006));
+plinth.add(box('plaque_engraving', M.lacquer, 0.104, 0.026, 0.0006, 0, PLINTH / 2, face + 0.0010));
+model.add(plinth);
+
+// ---- carcass ----
+const c = new THREE.Group(); c.name = 'carcass'; c.position.y = PLINTH;
+c.add(box('back_panel', M.lacquer, W, CH - T, T, 0, (CH - T) / 2, -D / 2 + T / 2));
+c.add(box('side_left', M.lacquer, T, CH - T, D - T, -W / 2 + T / 2, (CH - T) / 2, T / 2));
+c.add(box('side_right', M.lacquer, T, CH - T, D - T, W / 2 - T / 2, (CH - T) / 2, T / 2));
+c.add(box('top_panel', M.lacquer, W, T, D + DOOR_T, 0, CH - T / 2, DOOR_T / 2));
+// champagne silk chamber, set 0.5 mm off every carcass face
+const VH = CH - T - 2 * CLR, VD = ID - 0.002 - CLR;
+c.add(box('silk_back', M.velvet, IW - 2 * CLR, VH, VEL, 0, VH / 2 + CLR, -D / 2 + T + CLR + VEL / 2));
+c.add(box('silk_left', M.velvet, VEL, VH, VD, -IW / 2 + CLR + VEL / 2, VH / 2 + CLR, T / 2 - 0.001));
+c.add(box('silk_right', M.velvet, VEL, VH, VD, IW / 2 - CLR - VEL / 2, VH / 2 + CLR, T / 2 - 0.001));
+c.add(box('silk_floor', M.velvet, IW - 2 * CLR, VEL, VD, 0, CLR + VEL / 2, T / 2 - 0.001));
+model.add(c);
+
+// ---- memento: built lying flat (relief up), then stood on its bottom-back edge and leaned 6° ----
+const mem = new THREE.Group(); mem.name = 'memento';
+const FR = 0.028;                                              // frame moulding width
+mem.add(box('frame_back', M.wood, MW - 2 * FR + 0.002, 0.01, MHt - 2 * FR + 0.002, 0, 0.005, 0));
+mem.add(ring('frame_outer', M.wood, MW, MHt, FR, MD, 0, MD / 2, 0));
+const s1H = 0.058, s2H = 0.042, sT = 0.03;
+const s1W = MW - 2 * FR, s1D = MHt - 2 * FR;
+mem.add(ring('mat_step_1', M.leather, s1W, s1D, sT, s1H, 0, 0.01 + s1H / 2, 0));
+mem.add(ring('brass_fillet_outer', M.brass, s1W - 2 * sT + 0.008, s1D - 2 * sT + 0.008, 0.004, s1H + 0.004, 0, 0.01 + (s1H + 0.004) / 2, 0));
+const s2W = s1W - 2 * sT, s2D = s1D - 2 * sT;
+mem.add(ring('mat_step_2', M.leather, s2W, s2D, sT, s2H, 0, 0.01 + s2H / 2, 0));
+mem.add(ring('brass_fillet_inner', M.brass, s2W - 2 * sT + 0.006, s2D - 2 * sT + 0.006, 0.003, s2H + 0.003, 0, 0.01 + (s2H + 0.003) / 2, 0));
+mem.add(box('mat_floor', M.leather, s2W - 2 * sT, 0.003, s2D - 2 * sT, 0, 0.0115, 0));
+mem.add(box('slate_slab', M.slate, 0.15, 0.014, 0.16, 0, 0.02, 0));
+mem.add(box('slate_relief_panel', M.slateDk, 0.13, 0.003, 0.11, 0, 0.0285, -0.012));
+mem.add(box('slate_relief_bust', M.slate, 0.08, 0.004, 0.07, 0, 0.032, -0.01));
+// the memento's own light: one focus bulb in a bronze housing behind the top of the outer fillet
+const bulbY = 0.01 + s1H - 0.006, bulbZ = -(s1D / 2 - sT) + 0.008;
+mem.add(cyl('bulb_housing', M.brass, 0.006, 0.008, 0, bulbY, bulbZ, 'y'));
+const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.0035, 24, 16), M.glow);
+bulb.name = 'focus_bulb'; bulb.position.set(0, bulbY - 0.005, bulbZ); mem.add(bulb);
+const focus = new THREE.SpotLight(0xffc774, 0.9, 0.16, Math.PI / 6, 0.5, 1.5);
+focus.name = 'focus_bulb_light'; focus.position.set(0, bulbY - 0.006, bulbZ);
+focus.target.position.set(0, 0.03, 0.01); mem.add(focus, focus.target);
+// stand up: local +y (relief) -> world +z; local -z (top of picture) -> world +y
+mem.rotation.x = Math.PI / 2;
+mem.position.set(0, MHt / 2, 0);                               // bottom edge y=0, back face z=0, front face z=MD
+const stand = new THREE.Group(); stand.name = 'memento_stand';
+stand.add(mem);
+stand.rotation.x = -LEAN;
+const silkBackZ = -D / 2 + T + CLR + VEL;
+const zb = silkBackZ + 0.002 + MHt * sin;                      // top-back corner clears the silk by 2 mm
+stand.position.set(0, PLINTH + CLR + VEL, zb);
+model.add(stand);
+// bronze rail: 8 mm, tangent to the frame's front face 30 mm up
+const railY = 0.03, tLocal = (railY - MD * sin) / cos;
+const railZ = zb + MD * cos - tLocal * sin + 0.004;
+c.add(cyl('frame_rail', M.brass, 0.004, IW - 2 * CLR - 2 * VEL - 0.002, 0, railY, railZ, 'x'));
+[-1, 1].forEach((s, i) => c.add(cyl('rail_contact_pad_' + i, M.brass, 0.005, 0.0015, s * 0.08, 0.0035 + CLR + VEL, railZ, 'y')));
+
+// cool rim so the lacquer edges read against the dark ground
+const rim = new THREE.DirectionalLight(0x9fb4d8, 0.9); rim.name = 'rim_light';
+rim.position.set(-0.6, 0.5, -0.9); model.add(rim);
+
+// ---- doors: hinged on the outer vertical edges, meeting at a bronze seam ----
+const doorW = W / 2, doorH = CH - T - 0.002;
+const mkDoor = (side) => {
+  const g = new THREE.Group(); g.name = side < 0 ? 'door_left' : 'door_right';
+  const cx = -side * doorW / 2;
+  g.add(box('door_panel', M.lacquer, doorW - 0.001, doorH, DOOR_T, cx, doorH / 2 + 0.001, DOOR_T / 2 + CLR));
+  g.add(box('door_leather_panel', M.leather, doorW - 0.03, doorH - 0.03, 0.006, cx, doorH / 2 + 0.001, CLR - 0.003));
+  const fr = ring('foil_rule', M.brass, doorW - 0.05, doorH - 0.05, 0.0025, 0.0006, cx, doorH / 2 + 0.001, DOOR_T + CLR + 0.0003);
+  fr.rotation.x = Math.PI / 2; g.add(fr);
+  g.add(box('seam_bronze', M.brass, 0.002, doorH, DOOR_T + 0.0006, -side * (doorW - 0.001), doorH / 2 + 0.001, DOOR_T / 2 + CLR));
+  const px = -side * (doorW - 0.03), pz0 = DOOR_T + CLR;
+  g.add(cyl('door_pull', M.brass, 0.0035, 0.09, px, doorH / 2, pz0 + 0.012, 'y'));
+  g.add(cyl('door_pull_stud_a', M.brass, 0.0025, 0.012, px, doorH / 2 + 0.035, pz0 + 0.006, 'z'));
+  g.add(cyl('door_pull_stud_b', M.brass, 0.0025, 0.012, px, doorH / 2 - 0.035, pz0 + 0.006, 'z'));
+  g.position.set(side * W / 2, PLINTH, D / 2);
+  g.rotation.y = OPEN ? side * THREE.MathUtils.degToRad(112) : 0;
+  return g;
+};
+model.add(mkDoor(-1), mkDoor(1));
+[-1, 1].forEach(side => [0.06, doorH / 2, doorH - 0.06].forEach((y, i) => {
+  model.add(cyl('hinge_' + (side < 0 ? 'l' : 'r') + '_' + i, M.brass, 0.0045, 0.05, side * (W / 2 + 0.002), PLINTH + y, D / 2 + 0.001, 'y'));
+}));
+
+stage.setObject(model);
+</script>
+</body>
+</html>
