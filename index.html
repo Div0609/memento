@@ -10,23 +10,38 @@
   a{color:#c9b48a} a:hover{color:#e0cfa5}
   h1,h2,h3,h4,h5,h6{font-family:'Cormorant Garamond',Georgia,serif;margin:0}
   img{display:block;max-width:100%}
+  .wrap{max-width:1120px;margin:0 auto;padding:56px 32px 96px;display:flex;flex-direction:column;gap:72px}
+  .hero{aspect-ratio:16/9;min-height:380px}
+  .two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr);gap:40px}
+  .door{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:40px;align-items:center}
+  .h1{font-size:56px}
+  .lead{font-size:19px}
+  .hint{display:none}
+  @media (max-width:640px){
+    .wrap{padding:32px 20px 64px;gap:48px}
+    .hero{aspect-ratio:4/5;min-height:0}
+    .two,.door{grid-template-columns:minmax(0,1fr);gap:20px}
+    .h1{font-size:38px}
+    .lead{font-size:17px}
+    .hint{display:inline} .desk{display:none}
+  }
 </style>
 </head>
 <body>
-<div style="max-width:1120px;margin:0 auto;padding:56px 32px 96px;font-family:'Cormorant Garamond',Georgia,serif;display:flex;flex-direction:column;gap:72px">
+<div class="wrap">
 
   <header style="display:flex;flex-direction:column;gap:14px;max-width:760px">
     <h6 style="margin:0;color:#c9b48a;font-size:13px;letter-spacing:.14em;text-transform:uppercase;font-weight:600">Packaging concept · Delegate memento&nbsp;<br></h6>
-    <h1 style="margin:0;font-size:56px;line-height:1.02;letter-spacing:-.01em;font-weight:500">Packaging that is never put away. The case is the shrine.</h1>
-    <p style="margin:0;font-size:19px;line-height:1.55;color:#b3aa98;text-wrap:pretty">A lacquered cabinet with twin doors. Closed, it travels and hands over as a sealed oxblood-and-bronze object. Opened, the doors swing back, and the memento stands on its bronze rail with its own concealed light already on, exactly as it was photographed. It goes from the ceremony straight onto a desk or console, already displayed.</p>
+    <h1 class="h1" style="margin:0;line-height:1.02;letter-spacing:-.01em;font-weight:500">Packaging that is never put away. The case is the shrine.</h1>
+    <p class="lead" style="margin:0;line-height:1.55;color:#b3aa98;text-wrap:pretty">A lacquered cabinet with twin doors. Closed, it travels and hands over as a sealed oxblood-and-bronze object. Opened, the doors swing back, and the memento stands on its bronze rail with its own concealed light already on, exactly as it was photographed. It goes from the ceremony straight onto a desk or console, already displayed.</p>
   </header>
 
   <section style="display:flex;flex-direction:column;gap:12px">
-    <div style="position:relative;border-radius:14px;overflow:hidden;border:1px solid #302c26;aspect-ratio:16/9;min-height:380px">
+    <div class="hero" style="position:relative;border-radius:14px;overflow:hidden;border:1px solid #302c26">
       <iframe src="cabinet-3d.html" title="Memento display cabinet, 3D" style="position:absolute;inset:0;width:100%;height:100%;border:0"></iframe>
     </div>
     <div style="display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:14px;color:#8f877a">
-      <span>Drag to orbit · scroll to zoom · OBJ and GLB download in the corner</span>
+      <span><span class="desk">Drag to orbit · scroll to zoom · OBJ and GLB download in the corner</span><span class="hint">One finger to orbit · pinch to zoom</span></span>
       <a href="cabinet-3d.html" style="text-decoration:none">Open full screen →</a>
     </div>
   </section>
@@ -53,7 +68,7 @@
     </div>
   </section>
 
-  <section style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr);gap:40px">
+  <section class="two">
     <h2 style="margin:0;font-size:32px;font-weight:500;letter-spacing:-.01em">What makes it new</h2>
     <div style="display:flex;flex-direction:column;gap:22px">
       <div style="display:grid;grid-template-columns:28px minmax(0,1fr);gap:16px">
@@ -107,7 +122,7 @@
 
   <section style="display:flex;flex-direction:column;gap:24px">
     <h2 style="margin:0;font-size:32px;font-weight:500;letter-spacing:-.01em">Materials</h2>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:20px">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:20px">
       <div style="display:flex;flex-direction:column;gap:10px">
         <div style="aspect-ratio:4/3;border-radius:8px;background:linear-gradient(135deg,#6a1e22,#3a0f12 60%,#521619);border:1px solid #302c26"></div>
         <strong style="font-weight:600;font-size:17px">Oxblood lacquer</strong>
@@ -143,7 +158,7 @@
 
   <section style="display:flex;flex-direction:column;gap:24px">
     <h2 style="margin:0;font-size:32px;font-weight:500;letter-spacing:-.01em">Door face</h2>
-    <div style="display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:40px;align-items:center">
+    <div class="door">
       <div style="aspect-ratio:44/48;background:linear-gradient(135deg,#5e1a1e,#360e11 55%,#4a1417);border-radius:8px;display:grid;grid-template-columns:1fr 2px 1fr;border:1px solid #302c26;overflow:hidden">
         <div style="padding:7%;display:flex"><div style="flex:1;border:2px solid #b08a4e;padding:5%;display:flex"><div style="flex:1;border:1px solid #b08a4e"></div></div></div>
         <div style="background:#b08a4e"></div>
