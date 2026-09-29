@@ -39,6 +39,7 @@ const OPEN = q.get('open') !== '0';
 
 const M = {
   lacquer: new THREE.MeshStandardMaterial({ name: 'oxblood_lacquer', color: 0x4a1417, roughness: 0.14, metalness: 0.12 }),
+  lacquerDark: new THREE.MeshStandardMaterial({ name: 'groove_shadow', color: 0x1a0708, roughness: 0.9 }),
   brass:   new THREE.MeshStandardMaterial({ name: 'aged_bronze', color: 0xb08a4e, roughness: 0.38, metalness: 0.38 }),
   velvet:  new THREE.MeshStandardMaterial({ name: 'champagne_silk', color: 0xc9b48a, roughness: 0.85 }),
   leather: new THREE.MeshStandardMaterial({ name: 'oxblood_leather', color: 0x3a1214, roughness: 0.7 }),
@@ -70,10 +71,10 @@ const cyl = (name, mat, r, len, x, y, z, axis) => {
 
 // ---- dimensions (m). memento 13 x 11 x 3 in, standing upright, 13 wide ----
 const MW = 0.3302, MHt = 0.2794, MD = 0.0762;
-const T = 0.014, GAP = 0.03, DOOR_T = 0.016, PLINTH = 0.07, LEAN = THREE.MathUtils.degToRad(6);
-const W = MW + 2 * GAP + 2 * T;                  // 0.4182 carcass width
-const CH = MHt + 2 * GAP + T;                    // 0.3534 carcass height (chamber + top)
-const D = 0.146;                                  // carcass depth, back face to door plane
+const T = 0.014, GAP = 0.009, DOOR_T = 0.016, PLINTH = 0.07, LEAN = THREE.MathUtils.degToRad(6);
+const W = MW + 2 * GAP + 2 * T;                  // 0.3762 carcass width (5 mm each side after silk)
+const CH = MHt + 0.009 + 0.032 + T;             // 0.3344 carcass height: silk floor + 5 mm, lean rise + 5 mm headroom
+const D = 0.126;                                  // carcass depth, back face to door plane
 const VEL = 0.004, CLR = 0.0005;                  // silk thickness, anti-coplanar clearance
 const IW = W - 2 * T, ID = D - T;
 const sin = Math.sin(LEAN), cos = Math.cos(LEAN);
@@ -81,7 +82,7 @@ const sin = Math.sin(LEAN), cos = Math.cos(LEAN);
 const model = new THREE.Group(); model.name = 'memento_display_cabinet';
 
 // ---- plinth with push-to-open certificate drawer ----
-const PW = W + 0.02, PD = D + DOOR_T + 0.02, FT = 0.012;
+const PW = W + 0.008, PD = D + DOOR_T + 0.008, FT = 0.012;
 const pz = DOOR_T / 2, zf = pz + PD / 2;         // plinth centre z, plinth front face z
 const aw = W - 0.03, ah = PLINTH - 0.024;         // drawer aperture (1 mm reveal all round)
 const plinth = new THREE.Group(); plinth.name = 'plinth';
@@ -92,15 +93,23 @@ plinth.add(box('plinth_front_bottom', M.lacquer, PW, stripH, FT, 0, stripH / 2, 
 plinth.add(box('plinth_front_left', M.lacquer, sideW, ah + 0.002, FT, -PW / 2 + sideW / 2, PLINTH / 2, zf - FT / 2));
 plinth.add(box('plinth_front_right', M.lacquer, sideW, ah + 0.002, FT, PW / 2 - sideW / 2, PLINTH / 2, zf - FT / 2));
 plinth.add(ring('plinth_bronze_line', M.brass, PW + 0.001, PD + 0.001, 0.0015, 0.002, 0, PLINTH - 0.006, pz));
-const out = OPEN ? 0.06 : 0, DL = 0.155;
-plinth.add(box('drawer_front', M.lacquer, aw, ah, FT, 0, PLINTH / 2, zf - FT / 2 + out));
+const out = OPEN ? 0.06 : 0, DL = PD - FT - 0.014;   // drawer length fits inside plinth with 2 mm rear clearance
+plinth.add(box('drawer_front', M.lacquer, aw, ah, FT, 0, PLINTH / 2, zf - FT / 2 - 0.0005 + out));   // 0.5 mm behind plinth face when closed
 const dw = aw - 0.004, dh = ah - 0.006, dzc = zf - FT - DL / 2 + out, dy0 = PLINTH / 2 - dh / 2;
 plinth.add(box('drawer_floor', M.velvet, dw, 0.003, DL, 0, dy0 + 0.0015, dzc));
 plinth.add(ring('drawer_walls', M.velvet, dw, DL, 0.003, dh - 0.003, 0, dy0 + 0.003 + (dh - 0.003) / 2, dzc));
-if (OPEN) plinth.add(box('certificate_a5', M.paper, 0.210, 0.0015, 0.148, 0, dy0 + 0.003 + 0.00075, dzc));
-const face = zf + out;
-plinth.add(box('plinth_plaque', M.brass, 0.11, 0.032, 0.0012, 0, PLINTH / 2, face + 0.0006));
-plinth.add(box('plaque_engraving', M.lacquer, 0.104, 0.026, 0.0006, 0, PLINTH / 2, face + 0.0010));
+if (OPEN) plinth.add(box('certificate_folded', M.paper, 0.210, 0.0015, Math.min(0.148, DL - 0.012), 0, dy0 + 0.003 + 0.00075, dzc));
+const face = zf - 0.0005 + out;
+plinth.add(box('plinth_plaque', M.brass, 0.11, 0.024, 0.0012, 0, PLINTH / 2 - 0.006, face + 0.0006));
+plinth.add(box('plaque_engraving', M.lacquer, 0.104, 0.018, 0.0006, 0, PLINTH / 2 - 0.006, face + 0.0010));
+// visible pull: horizontal bronze-lined finger groove under the top edge of the drawer front
+const gy = PLINTH / 2 + ah / 2 - 0.009, gzd = face - 0.004;
+plinth.add(box('drawer_groove_back', M.brass, 0.09, 0.014, 0.0006, 0, gy, gzd - 0.0043));
+plinth.add(box('drawer_groove_top', M.brass, 0.09, 0.0006, 0.008, 0, gy + 0.007, gzd));
+plinth.add(box('drawer_groove_bottom', M.brass, 0.09, 0.0006, 0.008, 0, gy - 0.007, gzd));
+plinth.add(box('drawer_groove_side_a', M.brass, 0.0006, 0.014, 0.008, -0.045, gy, gzd));
+plinth.add(box('drawer_groove_side_b', M.brass, 0.0006, 0.014, 0.008, 0.045, gy, gzd));
+plinth.add(box('drawer_groove_void', M.lacquerDark, 0.0888, 0.0128, 0.0076, 0, gy, gzd));
 model.add(plinth);
 
 // ---- carcass ----
@@ -157,6 +166,18 @@ const railZ = zb + MD * cos - tLocal * sin + 0.004;
 c.add(cyl('frame_rail', M.brass, 0.004, IW - 2 * CLR - 2 * VEL - 0.002, 0, railY, railZ, 'x'));
 [-1, 1].forEach((s, i) => c.add(cyl('rail_contact_pad_' + i, M.brass, 0.005, 0.0015, s * 0.08, 0.0035 + CLR + VEL, railZ, 'y')));
 
+// top bail handle: bronze, 6 mm bar, 120 mm across, folds flat into a recess
+const hy = PLINTH + CH;
+const bail = new THREE.Group(); bail.name = 'carry_handle';
+// top pull: bronze-lined finger groove 120 x 24 x 10 mm recessed into the top, matching the door and drawer grooves
+const gyt = hy - 0.005, gzt = DOOR_T / 2;
+bail.add(box('top_groove_bottom', M.brass, 0.12, 0.0006, 0.024, 0, gyt - 0.0053, gzt));
+bail.add(box('top_groove_front', M.brass, 0.12, 0.010, 0.0006, 0, gyt, gzt + 0.012));
+bail.add(box('top_groove_back', M.brass, 0.12, 0.010, 0.0006, 0, gyt, gzt - 0.012));
+bail.add(box('top_groove_side_a', M.brass, 0.0006, 0.010, 0.024, -0.06, gyt, gzt));
+bail.add(box('top_groove_side_b', M.brass, 0.0006, 0.010, 0.024, 0.06, gyt, gzt));
+bail.add(box('top_groove_void', M.lacquerDark, 0.1188, 0.0098, 0.0228, 0, gyt, gzt));
+model.add(bail);
 // cool rim so the lacquer edges read against the dark ground
 const rim = new THREE.DirectionalLight(0x9fb4d8, 0.9); rim.name = 'rim_light';
 rim.position.set(-0.6, 0.5, -0.9); model.add(rim);
@@ -171,10 +192,14 @@ const mkDoor = (side) => {
   const fr = ring('foil_rule', M.brass, doorW - 0.05, doorH - 0.05, 0.0025, 0.0006, cx, doorH / 2 + 0.001, DOOR_T + CLR + 0.0003);
   fr.rotation.x = Math.PI / 2; g.add(fr);
   g.add(box('seam_bronze', M.brass, 0.002, doorH, DOOR_T + 0.0006, -side * (doorW - 0.001), doorH / 2 + 0.001, DOOR_T / 2 + CLR));
-  const px = -side * (doorW - 0.03), pz0 = DOOR_T + CLR;
-  g.add(cyl('door_pull', M.brass, 0.0035, 0.09, px, doorH / 2, pz0 + 0.012, 'y'));
-  g.add(cyl('door_pull_stud_a', M.brass, 0.0025, 0.012, px, doorH / 2 + 0.035, pz0 + 0.006, 'z'));
-  g.add(cyl('door_pull_stud_b', M.brass, 0.0025, 0.012, px, doorH / 2 - 0.035, pz0 + 0.006, 'z'));
+  // visible pull: a bronze-lined finger groove recessed into the door face at the meeting edge
+  const gx = -side * (doorW - 0.009), gz = DOOR_T + CLR - 0.004;   // groove centre, 4 mm behind door face
+  g.add(box('finger_groove_back', M.brass, 0.014, 0.09, 0.0006, gx, doorH / 2, gz - 0.0043));
+  g.add(box('finger_groove_side_a', M.brass, 0.0006, 0.09, 0.008, gx - 0.007, doorH / 2, gz));
+  g.add(box('finger_groove_side_b', M.brass, 0.0006, 0.09, 0.008, gx + 0.007, doorH / 2, gz));
+  g.add(box('finger_groove_top', M.brass, 0.014, 0.0006, 0.008, gx, doorH / 2 + 0.045, gz));
+  g.add(box('finger_groove_bottom', M.brass, 0.014, 0.0006, 0.008, gx, doorH / 2 - 0.045, gz));
+  g.add(box('finger_groove_void', M.lacquerDark, 0.0128, 0.0888, 0.0076, gx, doorH / 2, gz));
   g.position.set(side * W / 2, PLINTH, D / 2);
   g.rotation.y = OPEN ? side * THREE.MathUtils.degToRad(112) : 0;
   return g;
@@ -185,6 +210,13 @@ model.add(mkDoor(-1), mkDoor(1));
 }));
 
 stage.setObject(model);
+if (q.get('view') === 'front') {
+  const cam = stage._camera, ctl = stage._controls;
+  const b = new THREE.Box3().setFromObject(model), ctr = b.getCenter(new THREE.Vector3()), r = b.getBoundingSphere(new THREE.Sphere()).radius;
+  const dist = (r / Math.tan((cam.fov * Math.PI) / 360)) * 1.3;
+  cam.position.copy(ctr).add(new THREE.Vector3(0.55, 0.45, 1).normalize().multiplyScalar(dist));
+  if (ctl) { ctl.target.copy(ctr); ctl.update(); } else cam.lookAt(ctr);
+}
 </script>
 </body>
 </html>
