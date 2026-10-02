@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Memento portfolio case — 3D</title>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.184.0/build/three.module.js",
+    "three/addons/controls/OrbitControls.js": "https://unpkg.com/three@0.184.0/examples/jsm/controls/OrbitControls.js",
+    "three/addons/exporters/OBJExporter.js": "https://unpkg.com/three@0.184.0/examples/jsm/exporters/OBJExporter.js",
+    "three/addons/exporters/GLTFExporter.js": "https://unpkg.com/three@0.184.0/examples/jsm/exporters/GLTFExporter.js"
+  },
+  "integrity": {
+    "https://unpkg.com/three@0.184.0/build/three.module.js": "sha384-8FCZ1eVO6it4+pbec2aDtnTrwjWXZLJRC+MAGCIPDgsYnUrl/E0A2YlF8ioMKI/J",
+    "https://unpkg.com/three@0.184.0/build/three.core.js": "sha384-dw2ooPewaEIrAgl6oFDBmmBWCE9oW9LxRGcfwZ0hLvEprzo202wXl7vCYHRlSnOT",
+    "https://unpkg.com/three@0.184.0/examples/jsm/controls/OrbitControls.js": "sha384-4rziNxOBZKQ69i+w+f89KJ55TCYquwchVbByQwmaOeIOXdOU2PLDn3kOfXHwIJC9",
+    "https://unpkg.com/three@0.184.0/examples/jsm/exporters/OBJExporter.js": "sha384-nbwtoZENJD3Vq+ACK0CuGQdPMuDWHkamC2KJD70EV5nfg6jQjfppKOea07YJN+N3",
+    "https://unpkg.com/three@0.184.0/examples/jsm/exporters/GLTFExporter.js": "sha384-VofkvpG6HERhFCYbsUOHeNXBCqID2nfqkQqnVzE1jc/oPcz+qJ13ADdXH08hE+cQ"
+  }
+}
+</script>
+<style>
+  html,body{margin:0;height:100%;background:#1c1a17}
+  three-d-stage:not(:defined){visibility:hidden}
+  three-d-stage{display:block;width:100vw;height:100vh;height:100dvh;touch-action:none}
+</style>
+</head>
+<body>
+<three-d-stage name="memento-portfolio-case" background="#1c1a17" autorotate></three-d-stage>
+<script src="three-d-stage.js"></script>
+<script type="module">
+const stage = document.querySelector('three-d-stage');
+if (new URLSearchParams(location.search).get('still') === '1') stage.removeAttribute('autorotate');
+const { THREE } = await stage.ready;
+const q = new URLSearchParams(location.search);
+const OPEN = q.get('open') !== '0';
+const LIFT = q.get('pose') === 'lift';                       // mid-action: cover raised, not yet folded back
+
+const M = {
+  leather: new THREE.MeshStandardMaterial({ name: 'oxblood_leather', color: 0x4a1417, roughness: 0.6, metalness: 0.02 }),
+  leatherDk: new THREE.MeshStandardMaterial({ name: 'recess_shadow', color: 0x1a0708, roughness: 0.9 }),
+  deboss:  new THREE.MeshStandardMaterial({ name: 'blind_deboss', color: 0x3c1013, roughness: 0.7 }),
+  brass:   new THREE.MeshStandardMaterial({ name: 'aged_bronze', color: 0xb08a4e, roughness: 0.38, metalness: 0.38 }),
+  silk:    new THREE.MeshStandardMaterial({ name: 'champagne_silk', color: 0xc9b48a, roughness: 0.85 }),
+  mat:     new THREE.MeshStandardMaterial({ name: 'frame_leather_mat', color: 0x3a1214, roughness: 0.7 }),
+  wood:    new THREE.MeshStandardMaterial({ name: 'ebonised_wood_frame', color: 0x1c1512, roughness: 0.45 }),
+  slate:   new THREE.MeshStandardMaterial({ name: 'italian_slate', color: 0x8a847d, roughness: 0.98 }),
+  slateDk: new THREE.MeshStandardMaterial({ name: 'slate_relief', color: 0x6b655f, roughness: 1 }),
+  glow:    new THREE.MeshStandardMaterial({ name: 'warm_bulb', color: 0xffe2a8, emissive: 0xffc774, emissiveIntensity: 1.1, roughness: 0.6 }),
+  paper:   new THREE.MeshStandardMaterial({ name: 'cotton_paper', color: 0xefe8da, roughness: 0.9 }),
+};
+const box = (name, mat, w, h, d, x, y, z) => {
+  const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);
+  m.name = name; m.position.set(x, y, z); m.castShadow = m.receiveShadow = true; return m;
+};
+const ring = (name, mat, w, d, t, h, x, y, z) => {           // rectangular ring in xz, height along y
+  const g = new THREE.Group(); g.name = name;
+  g.add(box(name + '_n', mat, w, h, t, 0, 0, -d / 2 + t / 2));
+  g.add(box(name + '_s', mat, w, h, t, 0, 0, d / 2 - t / 2));
+  g.add(box(name + '_w', mat, t, h, d - 2 * t, -w / 2 + t / 2, 0, 0));
+  g.add(box(name + '_e', mat, t, h, d - 2 * t, w / 2 - t / 2, 0, 0));
+  g.position.set(x, y, z); return g;
+};
+const rimXY = (name, mat, w, h, t, d, x, y, z) => {          // rectangular rim in xy, depth along z, centred
+  const g = new THREE.Group(); g.name = name;
+  g.add(box(name + '_top', mat, w, t, d, 0, h / 2 - t / 2, 0));
+  g.add(box(name + '_bottom', mat, w, t, d, 0, -h / 2 + t / 2, 0));
+  g.add(box(name + '_left', mat, t, h - 2 * t, d, -w / 2 + t / 2, 0, 0));
+  g.add(box(name + '_right', mat, t, h - 2 * t, d, w / 2 - t / 2, 0, 0));
+  g.position.set(x, y, z); return g;
+};
+const cyl = (name, mat, r, len, x, y, z, axis) => {
+  const m = new THREE.Mesh(new THREE.CylinderGeometry(r, r, len, 32), mat);
+  m.name = name; m.position.set(x, y, z);
+  if (axis === 'x') m.rotation.z = Math.PI / 2; if (axis === 'z') m.rotation.x = Math.PI / 2;
+  m.castShadow = true; return m;
+};
+
+// ---- dimensions (m). memento 13 x 11 x 3 in ----
+const MW = 0.3302, MHt = 0.2794, MD = 0.0762;
+const S = 0.009, SILK = 0.004, G = 0.003, CLR = 0.0005;     // shell (ply + leather), silk-over-foam, interference allowance
+const W = MW + 2 * (G + SILK + S);                           // 0.3622
+const H = MHt + 2 * (G + SILK + S);                          // 0.3114
+const Db = S + SILK + MD + 0.002;                            // 0.0912 body depth, frame face 2 mm below rim
+const Dl = 0.012;                                            // cover panel
+const HR = 0.004;                                            // hinge knuckle radius
+const IZ0 = -Db + S + SILK + CLR;                            // silk back plane
+const LEAN = THREE.MathUtils.degToRad(12);                   // display lean, set by the hinge stop
+
+const model = new THREE.Group(); model.name = 'memento_portfolio_case';
+
+// Frame of reference: body closed stands with its bottom face on y=0, back face at z=-Db, front (open) face at z=0.
+// The hinge knuckle runs along the bottom BACK edge at (y=HR, z=-Db-HR). Closed, the cover sits on the front face (z 0..Dl).
+// Opening: the cover swings down past the bottom and comes to rest flat on the table behind the body (outer face up).
+// The body then tips back LEAN about the knuckle and rests on the cover. The knuckle is the common pivot.
+const KY = HR, KZ = HR;                                   // knuckle along the bottom FRONT edge
+const KY_OPEN = Dl + KY * Math.cos(LEAN) + Db * Math.sin(LEAN);   // open: knuckle height so the leaning body's rear-bottom edge lands on the cover top
+const pivot = new THREE.Group(); pivot.name = 'hinge_pivot'; pivot.position.set(0, KY, KZ); model.add(pivot);
+const inner = new THREE.Group(); inner.name = 'case_body_frame'; inner.position.set(0, -KY, -KZ); pivot.add(inner);
+pivot.rotation.x = (OPEN && !LIFT) ? -LEAN : 0;             // negative about x tips the top backward (toward -z)
+pivot.add(cyl('hinge_knuckle', M.brass, HR, W, 0, 0, 0, 'x'));
+
+// ---- body ----
+const body = new THREE.Group(); body.name = 'case_body';
+body.add(box('back_panel', M.leather, W, H, S, 0, H / 2, -Db + S / 2));
+body.add(rimXY('body_rim', M.leather, W, H, S, Db - S, 0, H / 2, (-Db + S) / 2));
+body.add(box('silk_back', M.silk, W - 2 * S - 2 * CLR, H - 2 * S - 2 * CLR, SILK, 0, H / 2, IZ0 - SILK / 2));
+const rimD = -0.002 - IZ0;
+body.add(rimXY('silk_rim', M.silk, W - 2 * S - 2 * CLR, H - 2 * S - 2 * CLR, SILK, rimD, 0, H / 2, IZ0 + rimD / 2));
+// two fine bronze-lined thumb grooves in the side silk, mid-height, to lift the frame out for wall hanging
+[-1, 1].forEach((s) => {
+  const gx = s * (W / 2 - S - CLR - SILK / 2), gyy = H / 2, gzz = -0.009;
+  const g = new THREE.Group(); g.name = 'lift_groove_' + (s < 0 ? 'left' : 'right');
+  g.add(box('lift_groove_back', M.brass, 0.0006, 0.06, 0.014, gx - s * 0.0053, gyy, gzz));
+  g.add(box('lift_groove_top', M.brass, 0.010, 0.0006, 0.014, gx - s * 0.0025, gyy + 0.03, gzz));
+  g.add(box('lift_groove_bottom', M.brass, 0.010, 0.0006, 0.014, gx - s * 0.0025, gyy - 0.03, gzz));
+  g.add(box('lift_groove_void', M.leatherDk, 0.0098, 0.0588, 0.0136, gx - s * 0.0025, gyy, gzz));
+  body.add(g);
+});
+inner.add(body);
+
+// ---- memento, built flat then stood up facing +z ----
+const mem = new THREE.Group(); mem.name = 'memento';
+const FR = 0.028;
+mem.add(box('frame_back', M.wood, MW - 2 * FR + 0.002, 0.01, MHt - 2 * FR + 0.002, 0, 0.005, 0));
+mem.add(ring('frame_outer', M.wood, MW, MHt, FR, MD, 0, MD / 2, 0));
+const s1H = 0.058, s2H = 0.042, sT = 0.03, s1W = MW - 2 * FR, s1D = MHt - 2 * FR;
+mem.add(ring('mat_step_1', M.mat, s1W, s1D, sT, s1H, 0, 0.01 + s1H / 2, 0));
+mem.add(ring('brass_fillet_outer', M.brass, s1W - 2 * sT + 0.008, s1D - 2 * sT + 0.008, 0.004, s1H + 0.004, 0, 0.01 + (s1H + 0.004) / 2, 0));
+const s2W = s1W - 2 * sT, s2D = s1D - 2 * sT;
+mem.add(ring('mat_step_2', M.mat, s2W, s2D, sT, s2H, 0, 0.01 + s2H / 2, 0));
+mem.add(ring('brass_fillet_inner', M.brass, s2W - 2 * sT + 0.006, s2D - 2 * sT + 0.006, 0.003, s2H + 0.003, 0, 0.01 + (s2H + 0.003) / 2, 0));
+mem.add(box('mat_floor', M.mat, s2W - 2 * sT, 0.003, s2D - 2 * sT, 0, 0.0115, 0));
+mem.add(box('slate_slab', M.slate, 0.15, 0.014, 0.16, 0, 0.02, 0));
+mem.add(box('slate_relief_panel', M.slateDk, 0.13, 0.003, 0.11, 0, 0.0285, -0.012));
+mem.add(box('slate_relief_bust', M.slate, 0.08, 0.004, 0.07, 0, 0.032, -0.01));
+const bulbY = 0.01 + s1H - 0.006, bulbZ = -(s1D / 2 - sT) + 0.008;
+mem.add(cyl('bulb_housing', M.brass, 0.006, 0.008, 0, bulbY, bulbZ, 'y'));
+const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.0035, 24, 16), M.glow);
+bulb.name = 'focus_bulb'; bulb.position.set(0, bulbY - 0.005, bulbZ); mem.add(bulb);
+const focus = new THREE.SpotLight(0xffc774, 0.9, 0.16, Math.PI / 6, 0.5, 1.5);
+focus.name = 'focus_bulb_light'; focus.position.set(0, bulbY - 0.006, bulbZ);
+focus.target.position.set(0, 0.03, 0.01); mem.add(focus, focus.target);
+mem.rotation.x = Math.PI / 2;
+mem.position.set(0, S + SILK + G + MHt / 2, IZ0);
+inner.add(mem);
+
+// ---- cover. Built in the knuckle frame so it can swing about it.
+// Closed pose (rotation 0): a leaf standing on the FRONT face, y in [0,H], z in [0,Dl], joined to the knuckle by a leather spine
+// wrapping under the body. We model the leaf + a thin bottom strap (the spine) as one rigid piece.
+const lid = new THREE.Group(); lid.name = 'cover';
+const leaf = new THREE.Group(); leaf.name = 'cover_leaf';
+leaf.position.set(0, -KY, -KZ);                               // leaf local = body frame (closed: y in [0,H], z in [0,Dl])
+leaf.add(box('cover_panel', M.leather, W, H, Dl, 0, H / 2, Dl / 2));
+// outer face (z = Dl): plain leather, blind-debossed emblem only (artwork to follow)
+const OUTZ = Dl + 0.0003;
+// State Emblem of India in bronze foil, 90 mm tall, centred on the cover
+const emblemTex = new THREE.TextureLoader().load('emblem-bronze.png');
+emblemTex.colorSpace = THREE.SRGBColorSpace; emblemTex.anisotropy = 8;
+const emblemMat = new THREE.MeshStandardMaterial({ name: 'bronze_foil_emblem', map: emblemTex, transparent: true, alphaTest: 0.08, roughness: 0.35, metalness: 0.5, color: 0xffffff, depthWrite: false });
+const emblem = new THREE.Mesh(new THREE.PlaneGeometry(0.09, 0.09), emblemMat);
+emblem.name = 'emblem_bronze_foil'; emblem.position.set(0, H / 2 + 0.01, Dl + 0.00015); emblem.renderOrder = 2; leaf.add(emblem);
+// inner face (z = 0): leather, a silk-lined certificate pocket (open at the top, A5 inside), two silk pads that bear on the frame when closed
+leaf.add(box('cover_inner_leather', M.mat, W - 2 * S, H - 2 * S, 0.0006, 0, H / 2, 0.0003));   // inner face sits 3 mm inside the panel: a recess so pads, well and clips stay within the plane
+const certY = H / 2 - 0.01;
+leaf.add(box('certificate_well_silk', M.silk, 0.222, 0.160, 0.0004, 0, certY, 0.0012));
+leaf.add(box('certificate_a5', M.paper, 0.210, 0.148, 0.0006, 0, certY, 0.0017));
+[-1, 1].forEach((s, i) => leaf.add(box('certificate_clip_' + i, M.brass, 0.018, 0.004, 0.0012, s * 0.06, certY + 0.072, 0.0021)));
+// thumb notch: 60 x 8 x 6 mm bronze-lined scallop in the top edge of the cover, invisible from the front
+leaf.add(box('edge_notch_floor', M.brass, 0.06, 0.0006, 0.006, 0, H - 0.0083, Dl / 2));
+leaf.add(box('edge_notch_side_a', M.brass, 0.0006, 0.008, 0.006, -0.03, H - 0.004, Dl / 2));
+leaf.add(box('edge_notch_side_b', M.brass, 0.0006, 0.008, 0.006, 0.03, H - 0.004, Dl / 2));
+leaf.add(box('edge_notch_void', M.leatherDk, 0.0588, 0.0078, 0.0058, 0, H - 0.004, Dl / 2));
+[-1, 1].forEach((s, i) => { leaf.add(box('silk_pad_recess_' + i, M.leatherDk, 0.062, 0.022, 0.0004, s * 0.14, 0.02, 0.0012)); leaf.add(box('silk_pad_' + i, M.silk, 0.06, 0.02, 0.0025, s * 0.14, 0.02, 0.00125)); });
+lid.add(leaf);
+// Rotation about the knuckle (at the bottom BACK). Closed = 0. The leaf swings down, under and back:
+// swings down and under: at -180° it lies flat beneath and behind the body, outer face down, inner face (pocket) up against the body's base.
+if (OPEN && !LIFT) {
+  // open: the cover is a world-space object lying flat on the table: y in [0,Dl], running back from the hinge line (z = KZ) by H
+  lid.rotation.x = -Math.PI / 2;                               // leaf y -> -z, leaf z -> +y
+  lid.position.set(0, KY, KZ);                                 // leaf origin (y=0,z=0 corner) lands at (y=0, z=KZ)… after rotation the panel spans y 0..Dl, z KZ-H..KZ
+  model.add(lid);
+  // bronze hinge leaf: a plate standing on the cover's top face carrying the knuckle, full width
+  const legH = KY_OPEN - Dl - HR;
+  model.add(box('hinge_leaf_plate', M.brass, W, legH, 0.003, 0, Dl + legH / 2, KZ + HR + 0.0015));
+} else {
+  lid.rotation.x = LIFT ? -Math.PI / 4 : 0;
+  pivot.add(lid);
+}
+// when open the body rests on the spine/leaf: lift the whole pivot by the leaf thickness so nothing interpenetrates the table
+// open: the knuckle sits on the cover's top face; body bottom-back edge drops Db·sin(LEAN) below the knuckle, so lift the body clear of the cover
+if (OPEN && !LIFT) pivot.position.y = KY_OPEN;                 // body's bottom-back edge lands exactly on the cover's top face
+
+// ---- handle: D-bail folding flush into a bronze-lined recess in the top edge ----
+const hr = new THREE.Group(); hr.name = 'handle_recess';
+const ry = H - 0.005, rz = -0.046;
+hr.add(box('recess_floor', M.brass, 0.124, 0.0006, 0.07, 0, ry - 0.0053, rz));
+hr.add(box('recess_front', M.brass, 0.124, 0.010, 0.0006, 0, ry, rz + 0.035));
+hr.add(box('recess_back', M.brass, 0.124, 0.010, 0.0006, 0, ry, rz - 0.035));
+hr.add(box('recess_side_a', M.brass, 0.0006, 0.010, 0.07, -0.062, ry, rz));
+hr.add(box('recess_side_b', M.brass, 0.0006, 0.010, 0.07, 0.062, ry, rz));
+hr.add(box('recess_void', M.leatherDk, 0.1228, 0.0098, 0.0688, 0, ry, rz));
+inner.add(hr);
+const handle = new THREE.Group(); handle.name = 'carry_handle';
+handle.add(cyl('handle_leg_a', M.brass, 0.004, 0.05, -0.055, 0.025, 0, 'y'));
+handle.add(cyl('handle_leg_b', M.brass, 0.004, 0.05, 0.055, 0.025, 0, 'y'));
+handle.add(cyl('handle_grip', M.leather, 0.006, 0.118, 0, 0.05, 0, 'x'));
+handle.add(cyl('handle_grip_end_a', M.brass, 0.0062, 0.008, -0.055, 0.05, 0, 'x'));
+handle.add(cyl('handle_grip_end_b', M.brass, 0.0062, 0.008, 0.055, 0.05, 0, 'x'));
+[-1, 1].forEach((s, i) => handle.add(cyl('handle_pivot_' + i, M.brass, 0.0045, 0.006, s * 0.055, 0, 0, 'x')));
+handle.position.set(0, H - 0.0045, -0.014);
+handle.rotation.x = OPEN ? -Math.PI / 2 : 0;                 // folded flat into the recess when displayed
+inner.add(handle);
+
+// cool rim so the leather edges read against the dark ground
+const rim = new THREE.DirectionalLight(0x9fb4d8, 0.9); rim.name = 'rim_light';
+rim.position.set(-0.6, 0.5, -0.9); model.add(rim);
+
+stage.setObject(model);
+const view = q.get('view');
+if (view === 'front' || view === 'side' || view === 'back') {
+  const cam = stage._camera, ctl = stage._controls;
+  const b = new THREE.Box3().setFromObject(model), ctr = b.getCenter(new THREE.Vector3()), r = b.getBoundingSphere(new THREE.Sphere()).radius;
+  const dist = (r / Math.tan((cam.fov * Math.PI) / 360)) * 1.3;
+  const dir = view === 'side' ? new THREE.Vector3(1, 0.3, 0.2) : view === 'back' ? new THREE.Vector3(0.6, 0.5, -1) : new THREE.Vector3(0.5, 0.4, 1);
+  cam.position.copy(ctr).add(dir.normalize().multiplyScalar(dist));
+  if (ctl) { ctl.target.copy(ctr); ctl.update(); } else cam.lookAt(ctr);
+}
+</script>
+</body>
+</html>

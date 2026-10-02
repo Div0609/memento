@@ -68,7 +68,14 @@
   .doortext{display:flex;flex-direction:column;gap:14px}
   .note{font-size:13px;color:#c9b48a}
 
+  .tabs{display:flex;gap:6px;padding:4px;border:1px solid #302c26;border-radius:999px;background:#211e1a;width:max-content;max-width:100%}
+  .tab{font:inherit;font-size:15px;letter-spacing:.04em;color:#b3aa98;background:transparent;border:0;border-radius:999px;padding:10px 20px;cursor:pointer;min-height:44px}
+  .tab[aria-selected="true"]{background:#4a1417;color:#efe8da}
+  .panel[hidden]{display:none}
+  .steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;align-items:start}
+  .step{display:flex;flex-direction:column;gap:12px}
   @media (max-width:960px){
+    .steps{grid-template-columns:repeat(2,minmax(0,1fr))}
     .three{grid-template-columns:repeat(2,minmax(0,1fr))}
     .cards{grid-template-columns:repeat(2,minmax(0,1fr))}
     .swatches{grid-template-columns:repeat(3,minmax(0,1fr))}
@@ -79,7 +86,8 @@
     .hero.live iframe{pointer-events:auto}
     .gate{display:flex} .hero.live .gate{display:none}
     .hint{display:inline} .desk{display:none}
-    .three,.two,.cards,.door{grid-template-columns:minmax(0,1fr)}
+    .three,.two,.cards,.door,.steps{grid-template-columns:minmax(0,1fr)}
+    .tabs{width:100%} .tab{flex:1;padding:10px 12px}
     .swatches{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
     .pt{grid-template-columns:24px minmax(0,1fr);gap:12px}
     .card{padding:16px}
@@ -89,16 +97,22 @@
 <body>
 <div class="wrap">
 
+  <h6 class="kicker" style="margin-bottom:-24px">Packaging concept · Delegate memento</h6>
+  <div class="tabs" role="tablist" aria-label="Packaging options" style="margin-bottom:-24px">
+    <button class="tab" role="tab" id="tab-1" aria-selected="true" aria-controls="opt-1" type="button">Option 1 · Cabinet</button>
+    <button class="tab" role="tab" id="tab-2" aria-selected="false" aria-controls="opt-2" type="button">Option 2 · Portfolio case</button>
+  </div>
+
+  <div class="panel wrap" id="opt-1" role="tabpanel" aria-labelledby="tab-1" style="padding:0;max-width:none">
   <header>
-    <h6 class="kicker">Packaging concept · Delegate memento</h6>
     <h1>Not the box it arrives in. The one it lives in.</h1>
     <p class="lead">A twin-door cabinet in oxblood lacquer and aged bronze. Closed, it is a sealed object that travels well and hands over with weight. Opened, the doors part on a slow hinge and the memento is already standing on its bronze rail, lit by its own bulb, exactly as it was photographed. The same case that carried it to the ceremony is the one it lives in afterwards, on a desk or a console, for years.</p>
   </header>
 
   <section class="stage">
-    <div class="hero" id="hero">
+    <div class="hero">
       <iframe src="cabinet-3d.html" title="Memento display cabinet, 3D"></iframe>
-      <button class="gate" type="button" id="gate" aria-label="Activate 3D view"><span>Tap to rotate the cabinet</span></button>
+      <button class="gate" type="button" aria-label="Activate 3D view"><span>Tap to rotate the cabinet</span></button>
     </div>
     <div class="under">
       <span><span class="desk">Drag to orbit · scroll to zoom</span><span class="hint">One finger to orbit · pinch to zoom</span></span>
@@ -173,11 +187,112 @@
     </div>
   </section>
 
+  </div>
+
+  <div class="panel wrap" id="opt-2" role="tabpanel" aria-labelledby="tab-2" hidden style="padding:0;max-width:none">
+  <header>
+    <h1>Carried like a dispatch case. Stands on its own cover.</h1>
+    <p class="lead">A slim leather-bound case, four inches deep, that hangs from one hand. Set it down, swing the cover down and under, and the case stands on it: the cover lies flat behind as the base, and the memento faces the room, leaning back twelve degrees in champagne silk, lit from within. Half the volume of the cabinet, in the same materials, with the same stillness.</p>
+  </header>
+
+  <section class="stage">
+    <div class="hero">
+      <iframe data-src="portfolio-3d.html" title="Memento portfolio case, 3D"></iframe>
+      <button class="gate" type="button" aria-label="Activate 3D view"><span>Tap to rotate the case</span></button>
+    </div>
+    <div class="under">
+      <span><span class="desk">Open, standing on its cover · drag to orbit · scroll to zoom</span><span class="hint">One finger to orbit · pinch to zoom</span></span>
+      <a href="portfolio-3d.html">Open full screen →</a>
+    </div>
+  </section>
+
+  <section class="sect">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;gap:16px;flex-wrap:wrap">
+      <h2>How it opens</h2>
+      <span class="muted">Three moves, no parts to find</span>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="square"><iframe data-src="portfolio-3d.html?open=0&amp;still=1&amp;view=front" title="Step 1, carried" tabindex="-1"></iframe></div>
+        <div class="pt"><span>01</span><p class="muted"><strong style="color:#efe8da">Set it down.</strong> It stands on its bottom edge. Fold the handle flush into the top.</p></div>
+      </div>
+      <div class="step">
+        <div class="square"><iframe data-src="portfolio-3d.html?pose=lift&amp;still=1&amp;view=side" title="Step 2, cover swung down" tabindex="-1"></iframe></div>
+        <div class="pt"><span>02</span><p class="muted"><strong style="color:#efe8da">Open the cover.</strong> A thumb in the notch on the top edge; the cover swings down on its bottom hinge. Inside it, the certificate. The relief is already lit.</p></div>
+      </div>
+      <div class="step">
+        <div class="square"><iframe data-src="portfolio-3d.html?still=1&amp;view=side" title="Step 3, cover flat as the base" tabindex="-1"></iframe></div>
+        <div class="pt"><span>03</span><p class="muted"><strong style="color:#efe8da">Swing it under.</strong> The cover passes beneath the case and lies flat behind it, emblem up. The case settles onto it at twelve degrees and stays.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="three">
+    <div class="tile">
+      <h6 class="kicker">Handed over</h6>
+      <div class="square"><iframe data-src="portfolio-3d.html?open=0&amp;still=1&amp;view=front" title="Case closed" tabindex="-1"></iframe></div>
+      <p class="muted">Plain oxblood leather, the State Emblem of India in bronze foil. Bronze only on the hinge line and the handle; the thumb notch sits in the top edge, out of sight.</p>
+    </div>
+    <div class="tile">
+      <h6 class="kicker">On display</h6>
+      <div class="square"><iframe data-src="portfolio-3d.html?still=1&amp;view=front" title="Case open, from the front" tabindex="-1"></iframe></div>
+      <p class="muted">The relief in its silk surround with nothing in front of it. Behind, the cover lies flat with the emblem facing up. The handle is folded flush.</p>
+    </div>
+    <div class="tile">
+      <h6 class="kicker">The memento it holds</h6>
+      <figure class="square"><img src="memento.jpg" alt="Slate relief in ebonised frame with brass fillets" loading="lazy"></figure>
+      <p class="muted">13 × 11 × 3 in. Italian slate relief in an ebonised frame with twin brass fillets, lit by its own focus bulb. The case adds no light and nothing that competes.</p>
+    </div>
+  </section>
+
+  <section class="two">
+    <h2>Why it works</h2>
+    <div class="points">
+      <div class="pt"><span>01</span><p><strong>Built around the hand.</strong> The handle sits on the top edge, centred over the mass, so eleven pounds hang straight and the case rides flat against the leg like a briefcase. Four inches deep, it passes through doors, car seats and security trays without being turned, and it fits an overhead locker.</p></div>
+      <div class="pt"><span>02</span><p><strong>The cover is the stand.</strong> Hinged along the bottom front edge, it swings down and under to lie flat behind the case, and the case rests on it. Its footprint is the base; the hinge stop sets the twelve-degree lean. No strut, no plinth, no separate part. The lid that protected the memento in transit is what presents it on the desk.</p></div>
+      <div class="pt"><span>03</span><p><strong>Held, not rattling.</strong> The cavity is silk over foam with two millimetres of interference, so the frame presses in and stays. Closed, the cover bears on the frame face through two silk pads near its top edge. Nothing moves in transit, and the frame never has to leave the case to be shown. When it should, two fine bronze thumb grooves in the silk rim let it be lifted straight out and hung on the wall; the case closes empty and keeps the certificate.</p></div>
+      <div class="pt"><span>04</span><p><strong>Leather, because it travels.</strong> Full-grain oxblood over a thin birch shell: lighter than lacquer, warm in the hand, forgiving of a knock, better with age. Bronze appears only where it works: the hinge, the handle, the notch, the clips, the emblem.</p></div>
+    </div>
+  </section>
+
+  <section class="sect">
+    <h2>Construction</h2>
+    <div class="cards">
+      <div class="card"><strong>Shell</strong><p>6 mm birch ply, mitred and splined, wrapped in 1.2 mm full-grain leather with turned edges. Outside 14¼ × 12¼ × 4 in closed; about 11 lb with the frame.</p></div>
+      <div class="card"><strong>Cover</strong><p>12 mm panel on a full-width bronze piano hinge along the bottom front edge. Swings 270° under the case to lie flat behind; the case rests on it at 12°, set by the hinge stop. Outside: plain leather, State Emblem of India in bronze foil, 90 mm. Inside: silk-lined A5 certificate well under two bronze clips, two silk pads that bear on the frame when closed.</p></div>
+      <div class="card"><strong>Cavity</strong><p>Champagne silk over 4 mm foam on all five faces, 2 mm interference on the frame. Frame face sits 2 mm below the rim. Two bronze-lined thumb grooves, 10 × 60 × 16 mm, in the side silk at mid-height, to lift the frame out for wall hanging.</p></div>
+      <div class="card"><strong>Handle</strong><p>Bronze D-bail, 8 mm bar, leather-wrapped grip, on two pivots in the top edge. Folds flush into a bronze-lined recess 124 × 70 × 10 mm. Rated 50 lb.</p></div>
+      <div class="card"><strong>Closure</strong><p>Four concealed magnets in the rim. One bronze-lined thumb notch, 60 × 8 × 6 mm, in the top edge of the cover. The 8 mm bronze knuckle along the bottom front edge is the only wearing edge, open or closed.</p></div>
+      <div class="card"><strong>Compared with the cabinet</strong><p>Cabinet 15⅛ × 15⅞ × 5⅞ in, about 1,410 in³, 12 lb. Case 14¼ × 12¼ × 4 in, about 710 in³, 11 lb. Same frame, same lighting, same palette. The case trades the plinth and drawer for a handle and a cover that is lid, stand and certificate holder in one.</p></div>
+    </div>
+  </section>
+
+  <section class="sect">
+    <h2>Materials</h2>
+    <div class="swatches">
+      <div class="sw"><div style="background:linear-gradient(160deg,#5a1a1d,#2c0c0e)"></div><strong>Oxblood leather</strong><span>Shell, cover, handle grip</span></div>
+      <div class="sw"><div style="background:linear-gradient(135deg,#d2b07a,#a67d42 45%,#6f5228 70%,#c4a06a)"></div><strong>Aged bronze</strong><span>Hinge, handle, notch, grooves, clips, emblem foil</span></div>
+      <div class="sw"><div style="background:radial-gradient(ellipse at 30% 30%,#e2d1a6,#bfa878 70%)"></div><strong>Champagne silk</strong><span>Cavity, certificate well, pads</span></div>
+      <div class="sw"><div style="background:linear-gradient(135deg,#efe9dc,#d9d2c2)"></div><strong>Cotton paper</strong><span>Certificate</span></div>
+    </div>
+  </section>
+  </div>
+
 </div>
 <script>
+  // Tabs: lazy-load option 2's 3D views on first open; remember the choice in the URL hash.
+  var tabs = document.querySelectorAll('.tab'), panels = document.querySelectorAll('.panel');
+  function select(id) {
+    tabs.forEach(function (t) { t.setAttribute('aria-selected', t.id === 'tab-' + id ? 'true' : 'false'); });
+    panels.forEach(function (p) { p.hidden = p.id !== 'opt-' + id; });
+    document.querySelectorAll('#opt-' + id + ' iframe[data-src]').forEach(function (f) { f.src = f.getAttribute('data-src'); f.removeAttribute('data-src'); });
+    if (history.replaceState) history.replaceState(null, '', '#option-' + id);
+  }
+  tabs.forEach(function (t) { t.addEventListener('click', function () { select(t.id.slice(4)); }); });
+  if (location.hash === '#option-2') select('2');
   // On touch screens the 3D view would otherwise capture every swipe and trap page scroll.
-  document.getElementById('gate').addEventListener('click', function () {
-    document.getElementById('hero').classList.add('live');
+  document.querySelectorAll('.gate').forEach(function (g) {
+    g.addEventListener('click', function () { g.closest('.hero').classList.add('live'); });
   });
 </script>
 </body>
